@@ -1,0 +1,360 @@
+.concierge-flow .body {
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+}
+.concierge-flow .title {
+  max-width: 360px;
+  text-wrap: pretty;
+}
+.concierge-eyebrow {
+  display: flex;
+  gap: 10px;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 650;
+  margin-bottom: 18px;
+}
+.concierge-eyebrow span {
+  color: var(--ink-sub);
+  font-weight: 500;
+}
+.concierge-description {
+  margin-top: 12px;
+  color: var(--ink-sub);
+  font-size: 16px;
+  line-height: 1.65;
+}
+.concierge-content {
+  flex: 1;
+  margin-top: 32px;
+}
+.concierge-error {
+  margin-bottom: 24px;
+}
+.concierge-request-input {
+  min-height: 168px;
+  padding: 18px;
+  background: var(--surface);
+  font-size: 19px;
+  line-height: 1.65;
+  resize: vertical;
+}
+.concierge-flow .label {
+  font-size: 16px;
+}
+.concierge-cta {
+  border-top: 0;
+  padding-top: 16px;
+  display: grid;
+  gap: 2px;
+}
+.concierge-cta .btn {
+  min-height: 56px;
+  text-decoration: none;
+}
+.concierge-text-action {
+  display: block;
+  background: none;
+  border: 0;
+  color: var(--ink-sub);
+  min-height: 48px;
+  padding: 12px 0;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-size: 15px;
+  text-align: left;
+}
+.concierge-text-action:disabled {
+  opacity: 0.45;
+}
+.concierge-cta .concierge-text-action {
+  text-align: center;
+  width: 100%;
+}
+.concierge-center {
+  text-align: center;
+}
+.concierge-thinking {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-height: 280px;
+  text-align: center;
+}
+.concierge-orb {
+  width: 120px;
+  height: 120px;
+  display: grid;
+  place-items: center;
+}
+.concierge-thinking p {
+  max-width: 260px;
+  color: var(--ink-sub);
+  font-size: 16px;
+  line-height: 1.8;
+}
+.concierge-step-searching .concierge-content,
+.concierge-step-connecting .concierge-content {
+  display: grid;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.concierge-results {
+  display: grid;
+  gap: 12px;
+}
+.concierge-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 21px 20px;
+  border-radius: 16px;
+  text-align: left;
+  width: 100%;
+}
+.concierge-result > span {
+  min-width: 0;
+}
+.concierge-result > svg {
+  flex-shrink: 0;
+  color: var(--ink-sub);
+}
+.concierge-result:hover {
+  border-color: var(--primary);
+}
+.concierge-result strong {
+  display: block;
+  font-size: 20px;
+  margin: 5px 0 8px;
+  font-weight: 650;
+}
+.concierge-result-dept {
+  font-size: 13px;
+  color: var(--primary);
+}
+.concierge-result-address {
+  display: block;
+  color: var(--ink-sub);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.concierge-address {
+  font-size: 18px;
+  line-height: 1.7;
+}
+.concierge-reason {
+  font-size: 16px;
+  color: var(--ink-sub);
+  line-height: 1.8;
+  margin: 24px 0 16px;
+}
+.concierge-facts dl {
+  margin: 0;
+}
+.concierge-facts dt {
+  font-size: 14px;
+  color: var(--ink-sub);
+  margin-bottom: 4px;
+}
+.concierge-facts dd {
+  margin: 0 0 24px;
+  font-size: 20px;
+}
+.concierge-source {
+  color: var(--primary);
+  font-size: 16px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 48px;
+}
+.concierge-fact-questions {
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+  margin-top: 16px;
+}
+.concierge-fact-questions h2 {
+  font-size: 18px;
+}
+.concierge-fact-questions ul {
+  padding-left: 20px;
+  font-size: 16px;
+  line-height: 1.8;
+}
+.concierge-choices {
+  display: grid;
+  gap: 14px;
+  padding: 0;
+  border: 0;
+  margin: 0;
+  min-width: 0;
+}
+.concierge-choice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 108px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px 18px;
+  background: var(--surface);
+  cursor: pointer;
+}
+.concierge-choice.selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.concierge-choice > span {
+  flex: 1;
+  min-width: 0;
+}
+.concierge-choice > svg {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+.concierge-choice strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 650;
+}
+.concierge-choice small {
+  display: block;
+  color: var(--ink-sub);
+  font-size: 14px;
+  margin-top: 6px;
+  line-height: 1.6;
+}
+.concierge-choice input,
+.concierge-check input {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+  accent-color: var(--primary);
+}
+.concierge-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.concierge-check input {
+  margin-top: 4px;
+}
+.concierge-letter {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px 20px;
+}
+.concierge-letter p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.85;
+  font-size: 17px;
+}
+.concierge-contact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.concierge-contact-icon {
+  display: grid;
+  place-items: center;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-radius: 50%;
+  width: 68px;
+  height: 68px;
+  margin: 4px 0 24px;
+}
+.concierge-contact > strong {
+  font-size: 28px;
+  letter-spacing: -0.6px;
+}
+.concierge-contact > p {
+  max-width: 290px;
+  margin: 16px 0 20px;
+}
+.concierge-waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  text-align: center;
+  padding: 32px 0;
+  line-height: 1.9;
+  color: var(--ink-sub);
+}
+.concierge-waiting svg {
+  color: var(--primary);
+}
+.concierge-recorded {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  padding-top: 12px;
+}
+.concierge-recorded > svg {
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+.concierge-recorded > strong {
+  font-size: 20px;
+}
+.concierge-booked-time {
+  font-size: 30px;
+  line-height: 1.5;
+  letter-spacing: -0.5px;
+}
+.concierge-entry {
+  background: #edf5f1;
+  border: 1px solid #c9ddd2;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: left;
+  display: block;
+  width: 100%;
+  color: var(--primary);
+  text-decoration: none;
+}
+.concierge-entry strong {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 19px;
+}
+.concierge-entry span {
+  display: block;
+  font-size: 14px;
+  margin-top: 7px;
+  line-height: 1.6;
+}
+@media (max-width: 374px) {
+  .concierge-flow .body {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .concierge-flow .title {
+    font-size: 27px;
+  }
+  .concierge-content {
+    margin-top: 24px;
+  }
+  .concierge-request-input {
+    min-height: 150px;
+  }
+  .concierge-choice {
+    gap: 10px;
+    padding: 18px 14px;
+  }
+}

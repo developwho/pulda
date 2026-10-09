@@ -1,0 +1,32 @@
+name: Validate service
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run check:repo
+      - run: npm test
+      - run: npm run build
+      - run: npm run build:concierge
+      - run: node scripts/smoke-production.mjs
+      - run: npm audit --audit-level=high
+      - name: Validate AWS template
+        run: |
+          python3 -m venv /tmp/pulda-cfn
+          /tmp/pulda-cfn/bin/pip install cfn-lint==1.57.2
+          /tmp/pulda-cfn/bin/cfn-lint infra/*.yaml
+      - name: Build production container without credentials
+        run: docker build --platform linux/amd64 -t pulda:test .

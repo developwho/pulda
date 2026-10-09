@@ -1,0 +1,11 @@
+/* Presentation controls only. Product CSS and screen components are unchanged. */
+.mock-toolbar { max-width: 480px; margin: 0 auto; padding: 8px 12px; background: #163e38; color: white; font-size: 12px; line-height: 1.5; }
+.mock-toolbar-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mock-toolbar-row > button { margin-left: auto; }
+.mock-toolbar button { min-height: 44px; padding: 8px 10px; background: transparent; border: 1px solid #8ca9a1; border-radius: 8px; color: white; font: inherit; cursor: pointer; }
+.mock-toolbar button:focus-visible { outline: 3px solid #f4cf75; }
+.mock-tools { display: grid; gap: 12px; padding: 14px 0; font-size: 14px; }
+.mock-tool-note { color: #d1e2dc; }
+.mock-tool-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+.mock-tool-notice { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.mock-tool-notice button { flex: none; white-space: nowrap; }

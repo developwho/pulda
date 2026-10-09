@@ -1,0 +1,17 @@
+**
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.server.json
+!vite.config.ts
+!index.html
+!mock.html
+!src/
+!src/**
+!server/
+!server/**
+!public/
+!public/**
+src/**/*.test.ts
+src/**/*.test.tsx
+server/**/*.test.ts

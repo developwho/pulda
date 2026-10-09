@@ -1,0 +1,286 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Pulda concierge - S3/CloudFront, HTTP API, queued GPT discovery, DynamoDB, optional AgentCore preferences
+
+Parameters:
+  AppOrigin:
+    Type: String
+    Default: https://bootstrap.invalid
+    AllowedPattern: 'https://[^/]+'
+    Description: Exact HTTPS origin, no trailing slash. Update to Website output after first creation.
+  ExistingApiHost:
+    Type: String
+    AllowedPattern: '[a-zA-Z0-9.-]+'
+    Description: Existing HTTPS visit API hostname (no scheme/path). Keep its APP_ORIGIN in sync.
+  SecretArn:
+    Type: String
+    Description: Existing Secrets Manager JSON secret with OPENAI_API_KEY and SESSION_SECRET.
+  OperatorName:
+    Type: String
+    MinLength: 1
+  PrivacyEmail:
+    Type: String
+    AllowedPattern: '[^\s@]+@[^\s@]+\.[^\s@]+'
+  Model:
+    Type: String
+    Default: gpt-6-luna
+    AllowedPattern: 'gpt-[a-zA-Z0-9.-]+'
+  MaxDailySearches:
+    Type: Number
+    Default: 100
+    MinValue: 0
+    MaxValue: 10000
+  EnableAgentCoreMemory:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['true', 'false']
+  EnableAccessCode:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['true', 'false']
+    Description: If true, the JSON secret must also contain PULDA_ACCESS_CODE, matching the visit API.
+
+Conditions:
+  UseAgentCore: !Equals [!Ref EnableAgentCoreMemory, 'true']
+  UseAccessCode: !Equals [!Ref EnableAccessCode, 'true']
+
+Resources:
+  StateTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{ AttributeName: pk, AttributeType: S }]
+      KeySchema: [{ AttributeName: pk, KeyType: HASH }]
+      TimeToLiveSpecification: { AttributeName: expires, Enabled: true }
+      SSESpecification: { SSEEnabled: true }
+  LimitTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{ AttributeName: pk, AttributeType: S }]
+      KeySchema: [{ AttributeName: pk, KeyType: HASH }]
+      TimeToLiveSpecification: { AttributeName: expires, Enabled: true }
+      SSESpecification: { SSEEnabled: true }
+  Memory:
+    Type: AWS::BedrockAgentCore::Memory
+    Condition: UseAgentCore
+    Properties:
+      Name: PuldaConciergePreferences
+      Description: Self-managed explicit preferences only; no automatic extraction models
+      EventExpiryDuration: 3
+      # No extraction strategies. Long-term records are deleted by the application;
+      # EventExpiryDuration does NOT expire long-term memory records.
+  FailedJobs:
+    Type: AWS::SQS::Queue
+    Properties:
+      SqsManagedSseEnabled: true
+      MessageRetentionPeriod: 86400
+  SearchJobs:
+    Type: AWS::SQS::Queue
+    Properties:
+      SqsManagedSseEnabled: true
+      VisibilityTimeout: 900
+      MessageRetentionPeriod: 3600
+      RedrivePolicy: { deadLetterTargetArn: !GetAtt FailedJobs.Arn, maxReceiveCount: 3 }
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: '$default'
+      DefaultRouteSettings: { ThrottlingBurstLimit: 20, ThrottlingRateLimit: 10 }
+  Concierge:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../build/concierge/
+      Handler: index.handler
+      Runtime: nodejs22.x
+      Architectures: [arm64]
+      MemorySize: 512
+      Timeout: 150
+      ReservedConcurrentExecutions: 6
+      Environment:
+        Variables:
+          NODE_ENV: production
+          APP_ORIGIN: !Ref AppOrigin
+          OPENAI_API_KEY: !Sub '{{resolve:secretsmanager:${SecretArn}:SecretString:OPENAI_API_KEY}}'
+          SESSION_SECRET: !Sub '{{resolve:secretsmanager:${SecretArn}:SecretString:SESSION_SECRET}}'
+          OPERATOR_NAME: !Ref OperatorName
+          PRIVACY_EMAIL: !Ref PrivacyEmail
+          PULDA_CONCIERGE_MODEL: !Ref Model
+          MAX_DAILY_AI_CALLS: !Ref MaxDailySearches
+          RATE_LIMIT_TABLE: !Ref LimitTable
+          CONCIERGE_TABLE: !Ref StateTable
+          CONCIERGE_QUEUE_URL: !Ref SearchJobs
+          AGENTCORE_MEMORY_ID: !If [UseAgentCore, !GetAtt Memory.MemoryId, '']
+          PULDA_ACCESS_CODE:
+            !If [
+              UseAccessCode,
+              !Sub '{{resolve:secretsmanager:${SecretArn}:SecretString:PULDA_ACCESS_CODE}}',
+              '',
+            ]
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:DeleteItem, dynamodb:Scan]
+              Resource: !GetAtt StateTable.Arn
+            - Effect: Allow
+              Action: dynamodb:UpdateItem
+              Resource: !GetAtt LimitTable.Arn
+            - Effect: Allow
+              Action: sqs:SendMessage
+              Resource: !GetAtt SearchJobs.Arn
+            - !If
+              - UseAgentCore
+              - Effect: Allow
+                Action:
+                  [
+                    bedrock-agentcore:BatchCreateMemoryRecords,
+                    bedrock-agentcore:ListMemoryRecords,
+                    bedrock-agentcore:DeleteMemoryRecord,
+                  ]
+                Resource: !GetAtt Memory.MemoryArn
+              - !Ref AWS::NoValue
+      Events:
+        Http:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /api/concierge/{proxy+}
+            Method: ANY
+            TimeoutInMillis: 29000
+        Search:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt SearchJobs.Arn
+            BatchSize: 1
+            FunctionResponseTypes: [ReportBatchItemFailures]
+            ScalingConfig: { MaximumConcurrency: 2 }
+        Cleanup:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(1 minute)
+            Input: '{"cleanup":true}'
+            RetryPolicy: { MaximumRetryAttempts: 2, MaximumEventAgeInSeconds: 300 }
+            DeadLetterConfig: { Type: SQS, Arn: !GetAtt FailedJobs.Arn }
+  ConciergeLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${Concierge}'
+      RetentionInDays: 7
+  CleanupOrFunctionErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{ Name: FunctionName, Value: !Ref Concierge }]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+  FailedJobsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions: [{ Name: QueueName, Value: !GetAtt FailedJobs.QueueName }]
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+  WebBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          [{ ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 } }]
+  WebAccess:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub '${AWS::StackName}-web'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+  Web:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: PriceClass_200
+        Origins:
+          - Id: static
+            DomainName: !GetAtt WebBucket.RegionalDomainName
+            OriginAccessControlId: !Ref WebAccess
+            S3OriginConfig: { OriginAccessIdentity: '' }
+          - Id: concierge
+            DomainName: !Sub '${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}'
+            CustomOriginConfig: { OriginProtocolPolicy: https-only, OriginSSLProtocols: [TLSv1.2] }
+          - Id: visit
+            DomainName: !Ref ExistingApiHost
+            CustomOriginConfig:
+              {
+                OriginProtocolPolicy: https-only,
+                OriginSSLProtocols: [TLSv1.2],
+                OriginReadTimeout: 60,
+              }
+        DefaultCacheBehavior:
+          TargetOriginId: static
+          ViewerProtocolPolicy: redirect-to-https
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          ResponseHeadersPolicyId: 67f7725c-6f97-4210-82d7-5512b31e9d03
+        CacheBehaviors:
+          - PathPattern: /api/concierge/*
+            TargetOriginId: concierge
+            ViewerProtocolPolicy: https-only
+            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+            OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac
+          - PathPattern: /api/*
+            TargetOriginId: visit
+            ViewerProtocolPolicy: https-only
+            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+            OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac
+        ViewerCertificate: { CloudFrontDefaultCertificate: true }
+  WebPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: cloudfront.amazonaws.com }
+            Action: s3:GetObject
+            Resource: !Sub '${WebBucket.Arn}/*'
+            Condition:
+              {
+                StringEquals:
+                  {
+                    'AWS:SourceArn': !Sub 'arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Web}',
+                  },
+              }
+
+Outputs:
+  Website: { Value: !Sub 'https://${Web.DomainName}' }
+  WebBucket: { Value: !Ref WebBucket }
+  DistributionId: { Value: !Ref Web }
+  ApiEndpoint: { Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}' }
+  StateTable: { Value: !Ref StateTable }
+  MemoryId:
+    Condition: UseAgentCore
+    Value: !GetAtt Memory.MemoryId

@@ -1,0 +1,185 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Pulda on ECS Express Mode with AWS-managed HTTPS and a read-only application container.
+Parameters:
+  PublicSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+  ImageUri:
+    Type: String
+    AllowedPattern: '.+@sha256:[a-f0-9]{64}'
+  SecretArn:
+    Type: String
+  AppOrigin:
+    Type: String
+    Default: https://bootstrap.invalid
+    AllowedPattern: 'https://[a-zA-Z0-9.-]+'
+  OperatorName:
+    Type: String
+    MinLength: 1
+  PrivacyEmail:
+    Type: String
+    AllowedPattern: '[^\s@]+@[^\s@]+\.[^\s@]+'
+Resources:
+  Limits:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{ AttributeName: pk, AttributeType: S }]
+      KeySchema: [{ AttributeName: pk, KeyType: HASH }]
+      TimeToLiveSpecification: { AttributeName: expires, Enabled: true }
+      SSESpecification: { SSEEnabled: true }
+  Logs:
+    Type: AWS::Logs::LogGroup
+    Properties: { RetentionInDays: 30 }
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ecs-tasks.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+      Policies:
+        - PolicyName: ReadAppSecret
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - { Effect: Allow, Action: 'secretsmanager:GetSecretValue', Resource: !Ref SecretArn }
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ecs-tasks.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: SharedUsageLimits
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - { Effect: Allow, Action: 'dynamodb:UpdateItem', Resource: !GetAtt Limits.Arn }
+  InfrastructureRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ecs.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonECSInfrastructureRoleforExpressGatewayServices'
+      Policies:
+        - PolicyName: ManageThisExpressService
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [ecs:DescribeServices, ecs:UpdateService]
+                Resource: !Sub 'arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:service/${Cluster}/pulda'
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      CapacityProviders: [FARGATE]
+  Task:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      RequiresCompatibilities: [FARGATE]
+      NetworkMode: awsvpc
+      Cpu: '256'
+      Memory: '512'
+      ExecutionRoleArn: !GetAtt ExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      RuntimePlatform: { CpuArchitecture: X86_64, OperatingSystemFamily: LINUX }
+      ContainerDefinitions:
+        - Name: Main
+          Image: !Ref ImageUri
+          Essential: true
+          User: '1000'
+          ReadonlyRootFilesystem: true
+          LinuxParameters:
+            InitProcessEnabled: true
+            Capabilities: { Drop: [ALL] }
+          StopTimeout: 30
+          PortMappings: [{ ContainerPort: 3001, Protocol: tcp, Name: http }]
+          HealthCheck:
+            Command:
+              [
+                CMD-SHELL,
+                'node -e "fetch(''http://127.0.0.1:3001/readyz'').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"',
+              ]
+            Interval: 30
+            Timeout: 5
+            Retries: 3
+            StartPeriod: 20
+          Environment:
+            - { Name: NODE_ENV, Value: production }
+            - { Name: APP_ORIGIN, Value: !Ref AppOrigin }
+            - { Name: RATE_LIMIT_TABLE, Value: !Ref Limits }
+            - { Name: AWS_REGION, Value: !Ref 'AWS::Region' }
+            - { Name: PULDA_MODEL, Value: gpt-6-luna }
+            - { Name: PULDA_TRANSCRIBE_MODEL, Value: gpt-live-transcribe }
+            - { Name: MAX_DAILY_AI_CALLS, Value: '1000' }
+            - { Name: MAX_DAILY_VOICE_SESSIONS, Value: '200' }
+            - { Name: OPERATOR_NAME, Value: !Ref OperatorName }
+            - { Name: PRIVACY_EMAIL, Value: !Ref PrivacyEmail }
+          Secrets:
+            - { Name: OPENAI_API_KEY, ValueFrom: !Sub '${SecretArn}:OPENAI_API_KEY::' }
+            - { Name: SESSION_SECRET, ValueFrom: !Sub '${SecretArn}:SESSION_SECRET::' }
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref Logs
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: app
+              mode: non-blocking
+              max-buffer-size: 1m
+  Service:
+    Type: AWS::ECS::ExpressGatewayService
+    Properties:
+      ServiceName: pulda
+      Cluster: !Ref Cluster
+      InfrastructureRoleArn: !GetAtt InfrastructureRole.Arn
+      TaskDefinitionArn: !Ref Task
+      HealthCheckPath: /readyz
+      NetworkConfiguration: { Subnets: !Ref PublicSubnets }
+      ScalingTarget:
+        MinTaskCount: 2
+        MaxTaskCount: 4
+        AutoScalingMetric: AVERAGE_CPU
+        AutoScalingTargetValue: 60
+  WebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Scope: REGIONAL
+      DefaultAction: { Allow: {} }
+      VisibilityConfig:
+        { CloudWatchMetricsEnabled: true, SampledRequestsEnabled: false, MetricName: PuldaWAF }
+      Rules:
+        - Name: IPRequestLimit
+          Priority: 0
+          Statement:
+            RateBasedStatement: { Limit: 1000, AggregateKeyType: IP }
+          Action: { Block: {} }
+          VisibilityConfig:
+            { CloudWatchMetricsEnabled: true, SampledRequestsEnabled: false, MetricName: PuldaRate }
+  WebACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !GetAtt Service.ECSManagedResourceArns.IngressPath.LoadBalancerArn
+      WebACLArn: !GetAtt WebACL.Arn
+Outputs:
+  Endpoint:
+    Value: !GetAtt Service.Endpoint
+  ServiceArn:
+    Value: !GetAtt Service.ServiceArn
+  ClusterName:
+    Value: !Ref Cluster
+  LogGroup:
+    Value: !Ref Logs
+  LimitsTable:
+    Value: !Ref Limits

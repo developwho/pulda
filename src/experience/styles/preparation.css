@@ -1,0 +1,277 @@
+.prepare-flow-bar {
+  gap: 8px;
+}
+.prepare-flow-bar .icon-btn {
+  flex-shrink: 0;
+  font-size: 14px;
+  gap: 2px;
+}
+.prepare-flow-label {
+  font-size: 15px;
+  font-weight: 700;
+  margin-right: auto;
+}
+.prepare-shortcut {
+  font-size: 13px;
+  white-space: nowrap;
+}
+.prepare-progress {
+  display: flex;
+  gap: 10px;
+  padding: 16px 28px 4px;
+}
+.prepare-progress > span {
+  flex: 1;
+  color: var(--ink-sub);
+  font-size: 12px;
+}
+.prepare-progress i {
+  display: block;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--line);
+  margin-bottom: 9px;
+}
+.prepare-progress .active {
+  color: var(--primary);
+}
+.prepare-progress .active i {
+  background: var(--primary);
+}
+.prepare-step {
+  padding-top: 32px;
+  animation: prepare-enter 160ms ease-out both;
+}
+.prepare-step.back {
+  animation-name: prepare-back;
+}
+.prepare-step .title {
+  font-size: 30px;
+  line-height: 1.45;
+  letter-spacing: -1px;
+  outline: none;
+}
+.prepare-step .lead {
+  font-size: 17px;
+  margin-top: 16px;
+  line-height: 1.65;
+}
+.prepare-input-group {
+  margin-top: 30px;
+}
+.prepare-step .prepare-reason {
+  min-height: 190px;
+  font-size: 20px;
+  line-height: 1.65;
+  resize: vertical;
+}
+.prepare-reason::placeholder {
+  font-size: 17px;
+}
+.prepare-refine {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 15px;
+}
+.prepare-options {
+  display: grid;
+  gap: 12px;
+  margin-top: 30px;
+}
+.prepare-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 80px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: white;
+  color: var(--ink);
+  text-align: left;
+  font-size: 19px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.prepare-option:hover {
+  border-color: var(--primary);
+}
+.prepare-option svg {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+.prepare-options .choice {
+  min-height: 76px;
+  font-size: 18px;
+  align-items: center;
+}
+.prepare-options .choice > .check {
+  margin-top: 0;
+}
+.prepare-known {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: white;
+}
+.prepare-known + .prepare-options {
+  margin-top: 12px;
+}
+.prepare-find-link {
+  display: inline-flex;
+  margin-top: 30px;
+  font-size: 14px;
+  color: var(--ink-sub);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.prepare-department {
+  margin-top: 24px;
+}
+.prepare-department summary {
+  font-size: 15px;
+  color: var(--ink-sub);
+  cursor: pointer;
+  padding: 8px 0;
+}
+.prepare-department .field {
+  margin-top: 12px;
+}
+.prepare-flow .prepare-flow-footer {
+  display: grid;
+  gap: 12px;
+  padding: 16px 28px max(24px, env(safe-area-inset-bottom));
+  border-top: 0;
+}
+.prepare-flow-footer > .btn-text {
+  justify-self: center;
+  font-size: 15px;
+}
+.prepare-flow-footer > .prepare-delete {
+  color: var(--error);
+  min-height: 44px;
+}
+.prepare-review {
+  display: grid;
+  gap: 24px;
+  margin-top: 28px;
+}
+.prepare-review > div {
+  padding: 20px;
+  border-radius: 16px;
+  background: white;
+  border: 1px solid var(--line);
+}
+.prepare-summary-section {
+  padding: 28px 0;
+  border-bottom: 1px solid var(--line);
+}
+.prepare-summary-section .section-title {
+  font-size: 20px;
+}
+.prepare-summary-section .link {
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.prepare-summary-section .row {
+  align-items: flex-start;
+}
+.prepare-summary-section .row > svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.prepare-summary-note {
+  margin-top: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.prepare-summary-note > p {
+  flex: 1;
+  min-width: 0;
+  font-size: 21px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.prepare-summary-note > .icon-btn {
+  flex-shrink: 0;
+  color: var(--ink-sub);
+}
+.prepare-summary-section > .btn-text {
+  margin-top: 20px;
+  font-size: 15px;
+}
+.prepare-request-summary {
+  display: grid;
+  gap: 14px;
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+}
+.prepare-request-summary li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 17px;
+  line-height: 1.65;
+}
+.prepare-request-summary svg {
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.prepare-summary-actions {
+  display: grid;
+  gap: 10px;
+}
+@keyframes prepare-enter {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes prepare-back {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@media (max-width: 360px) {
+  .prepare-progress {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .prepare-step .title {
+    font-size: 27px;
+  }
+  .prepare-flow-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .prepare-shortcut {
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prepare-step {
+    animation: none;
+  }
+}

@@ -1,0 +1,45 @@
+/* Existing Pulda visual language over the imported visit flow. */
+:root {
+  --line: #d9dfda;
+  --primary-soft: #e5f1ed;
+  --pad: 24px;
+  --tab-h: 104px;
+}
+html, body { background: #edf0ed; }
+.app { box-shadow: 0 0 60px #19362d06; }
+.bar { min-height: 76px; padding: 12px 16px; }
+.bar-label.brand { display: flex; align-items: center; gap: 8px; color: var(--primary); font-size: 22px; font-weight: 800; letter-spacing: -1px; }
+.brand-mark { display: block; width: 44px; height: 44px; flex: 0 0 44px; object-fit: contain; }
+.title { font-size: 30px; line-height: 1.42; letter-spacing: -1.3px; text-wrap: initial; }
+.section-title { line-height: 1.45; letter-spacing: -0.65px; }
+.btn { border-width: 1px; border-radius: 11px; padding: 14px 18px; font-size: 17px; font-weight: 600; line-height: 1.5; }
+.btn-secondary { background: transparent; color: var(--primary); border-color: #769991; }
+.btn-quiet { color: var(--ink-sub); background: transparent; }
+.btn:active { transform: none; }
+.tabs {
+  bottom: max(14px, env(safe-area-inset-bottom));
+  width: calc(100% - 32px); max-width: 448px; height: auto;
+  gap: 4px; padding: 7px; border: 1px solid #e6eae6;
+  border-radius: 23px; box-shadow: 0 5px 24px #1a372813;
+}
+.tab { min-height: 62px; padding: 7px 4px; gap: 4px; border: 0; border-radius: 17px; font-size: 13.5px; font-weight: 500; line-height: 1.4; }
+.tab[aria-current='page'] { border: 0; background: var(--primary-soft); color: var(--primary); font-weight: 700; }
+dialog.sheet { border-radius: 24px 24px 0 0; max-height: calc(100dvh - 24px); box-shadow: 0 -10px 50px #142d2a15; font-size: 18px; line-height: 1.65; }
+dialog.sheet::backdrop { background: #152f2b75; }
+.sheet-head { padding: 18px 16px 12px 24px; }
+.sheet-body { padding-bottom: max(28px, env(safe-area-inset-bottom)); }
+.caption-consent .sheet-head { padding-bottom: 28px; }
+.caption-consent .sheet-title { font-size: 28px; }
+.caption-intro-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 28px; }
+.caption-intro-list li { display: flex; align-items: flex-start; gap: 16px; }
+.caption-intro-list svg { flex: 0 0 24px; width: 24px; height: 24px; margin-top: 4px; color: var(--primary); }
+.caption-intro-caution { font-size: 16px; margin-top: 28px; }
+.caption-intro-actions { margin-top: 24px; }
+.caption-intro-actions > .hint { margin-bottom: 12px; }
+.caption-intro-actions .btn { margin-top: 12px; }
+.caption-intro-actions details { font-size: 14px; color: var(--ink-sub); }
+.caption-intro-actions summary { cursor: pointer; min-height: 44px; display: list-item; align-content: center; }
+.caption-demo { margin-top: 12px; }
+.calendar-choice { display: flex; align-items: flex-start; gap: 12px; }
+.calendar-choice input { width: 22px; height: 22px; flex: 0 0 22px; margin-top: 4px; accent-color: var(--primary); }
+.calendar-planner { margin-top: 24px; }

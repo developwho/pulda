@@ -1,0 +1,258 @@
+.consult .captions {
+  min-height: 100px;
+}
+.consult .consult-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 6px;
+}
+.consult .consult-actions .btn {
+  min-width: 0;
+  min-height: 56px;
+  padding: 12px 4px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--primary-press);
+  background: var(--surface);
+  border-color: var(--primary);
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+  white-space: nowrap;
+}
+@media (min-width: 390px) {
+  .consult .consult-actions .btn { font-size: 16px; }
+}
+@media (max-width: 359px) {
+  .consult .consult-actions .btn { font-size: 14px; padding-inline: 2px; }
+}
+@media (hover: hover) {
+  .consult .consult-actions .btn:hover:not(:disabled) {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+}
+.consult .consult-actions .btn:focus-visible {
+  background: var(--primary);
+  color: #fff;
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+.consult .consult-actions .btn:active:not(:disabled) {
+  background: var(--primary-press);
+  border-color: var(--primary-press);
+  color: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+  .consult .consult-actions .btn { transition: none; }
+}
+.explanation-dock {
+  flex: none;
+}
+.caption-entry .cap {
+  margin: 0;
+}
+.caption-entry.selected {
+  border-left: 3px solid var(--primary);
+  padding-left: 12px;
+}
+.caption-entry .caption-term {
+  display: inline;
+  padding: 3px 1px;
+  border: 0;
+  border-radius: 4px;
+  font: inherit;
+  color: var(--primary);
+  background: transparent;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+.caption-entry .caption-term[aria-expanded='true'] {
+  background: var(--primary-soft);
+}
+.caption-entry .sentence-explain {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 0 12px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-sub);
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.captions-help {
+  display: block;
+  margin: 4px 0 16px;
+  font-size: 13px;
+  color: var(--ink-sub);
+}
+.explanation-card {
+  flex: 0 1 auto;
+  min-height: 180px;
+  max-height: 46dvh;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 22px 22px 0 0;
+  background: var(--surface);
+  box-shadow: 0 -8px 24px #192d2a0a;
+  position: relative;
+  z-index: 2;
+}
+.explanation-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 12px 8px 22px;
+  flex: none;
+}
+.explanation-head h2 {
+  font-size: 22px;
+  outline: none;
+  line-height: 1.35;
+}
+.explanation-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.explanation-content {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 22px 14px;
+}
+.explanation-original {
+  margin: 3px 0 14px;
+  font-size: 14px;
+  color: var(--ink-sub);
+  line-height: 1.5;
+}
+.explanation-original summary {
+  cursor: pointer;
+}
+.explanation-original p {
+  padding-top: 8px;
+}
+.explanation-view {
+  display: flex;
+  gap: 4px;
+  margin-top: 16px;
+  border-radius: 10px;
+  background: var(--bg);
+  padding: 3px;
+}
+.explanation-view button {
+  flex: 1;
+  padding: 7px 4px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.explanation-view button[aria-pressed='true'] {
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 700;
+}
+.explanation-chunks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.explanation-chunks li {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  font-size: 20px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+.explanation-lines {
+  font-size: 22px;
+  line-height: 1.6;
+}
+.explanation-note {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--ink-sub);
+}
+.explanation-reference {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--ink-sub);
+}
+.explanation-reference summary {
+  cursor: pointer;
+  padding: 10px 0;
+}
+.explanation-reference a {
+  color: var(--primary);
+}
+.explanation-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin-top: 10px;
+}
+.explanation-links .btn-text,
+.explanation-links a {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  color: var(--ink-sub);
+  min-height: 44px;
+}
+.explanation-foot {
+  display: flex;
+  flex: none;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--ink-sub);
+}
+.explanation-foot button {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border: 0;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px;
+  min-height: 36px;
+}
+.explanation-wait {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 17px;
+  padding: 12px 0;
+}
+@media (max-height: 680px) {
+  .consult:has(.explanation-card) .controls > .btn-row {
+    display: none;
+  }
+  .consult:has(.explanation-card) .bar {
+    min-height: 56px;
+    padding: 4px 12px;
+  }
+  .consult:has(.explanation-card) .captions {
+    min-height: 60px;
+  }
+  .explanation-card {
+    max-height: 40dvh;
+  }
+}
