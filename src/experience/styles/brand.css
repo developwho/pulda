@@ -22,6 +22,7 @@ html, body { background: #edf0ed; }
   gap: 4px; padding: 7px; border: 1px solid #e6eae6;
   border-radius: 23px; box-shadow: 0 5px 24px #1a372813;
 }
+.consult .tabs { margin: 0 auto max(14px, env(safe-area-inset-bottom)); }
 .tab { min-height: 62px; padding: 7px 4px; gap: 4px; border: 0; border-radius: 17px; font-size: 13.5px; font-weight: 500; line-height: 1.4; }
 .tab[aria-current='page'] { border: 0; background: var(--primary-soft); color: var(--primary); font-weight: 700; }
 dialog.sheet { border-radius: 24px 24px 0 0; max-height: calc(100dvh - 24px); box-shadow: 0 -10px 50px #142d2a15; font-size: 18px; line-height: 1.65; }

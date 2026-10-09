@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { CalendarDays, Check, Maximize2, Pencil, Plus, Settings } from 'lucide-react'
 import { formatDate, formatTime } from '../lib/time'
 import type { Preparation, Visit } from '../lib/types'
-import { DemoTag, Screen } from '../ui'
+import { Screen } from '../ui'
 
 interface Props {
   visit: Visit
@@ -50,11 +50,6 @@ export default function PreparationSummary({ visit, edit, present, consult }: Pr
         <br />
         내용은 언제든 고칠 수 있어요.
       </p>
-      {visit.demo && (
-        <p className="mt16">
-          <DemoTag />
-        </p>
-      )}
       <section className="prepare-summary-section">
         <div className="section-head">
           <h2 className="section-title">이번 진료</h2>

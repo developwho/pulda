@@ -170,10 +170,6 @@ export function SourceQuote({ source, quote }: { source: Source; quote: string }
   );
 }
 
-export function DemoTag() {
-  return <span className="tag">만든 예시 · 실제 진료가 아니에요</span>;
-}
-
 /** 병원 답을 대화 말풍선으로 보여준다. 누가 한 말인지는 위에 작게 적는다. */
 export function ReplyBubble({ from, text }: { from: string; text: string }) {
   return (

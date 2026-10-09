@@ -20,7 +20,7 @@ export default function HospitalThread() {
   }, [deskUrl]);
 
   return (
-    <Screen label="진료 후" title="병원과 주고받은 내용" back="/after">
+    <Screen label="진료 후" title="병원 창구와 소통하기" back="/after">
       <div className="thread mt24" aria-live="polite">
         {thread.length === 0 && <p className="sub">아직 주고받은 내용이 없어요.</p>}
         {thread.map((msg) => (

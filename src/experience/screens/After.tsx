@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Ban, CalendarDays, Check, ChevronRight, HelpCircle, Loader2, Pill, Plus, Settings, Stethoscope } from 'lucide-react';
+import { Ban, CalendarDays, Check, ChevronRight, HelpCircle, Loader2, Pill, Plus, QrCode, Settings, Stethoscope } from 'lucide-react';
 import { formatWhen, todayISO } from '../lib/time';
 import type { Issue, PlanAction, Source, Visit } from '../lib/types';
-import { mutate, removeSource, RETENTION_DAYS, runAnalysis, setStorage, useVisit } from '../store/visit';
+import { mutate, removeSource, runAnalysis, setStorage, useVisit } from '../store/visit';
 import { Notice, Screen, Sheet, SourceTag } from '../ui';
 import { isMockMode } from '../runtime';
 
@@ -126,10 +126,10 @@ export default function After() {
           {plan.basedOn.length ? `${plan.basedOn.join(', ')}에서 찾았어요.` : '정리할 자료가 아직 없어요.'}
         </p>
       )}
-      <p className="sub mt8">
+      {!isMockMode && <p className="sub mt8">
         자동으로 정리했어요. 의료진이 확인한 내용은 아니에요.
         {visit.demo && ' 만든 예시예요.'}
-      </p>
+      </p>}
 
       <div className="stack mt16">
         {analysis === 'running' && (
@@ -231,6 +231,25 @@ export default function After() {
         </section>
       )}
 
+      <section className="section" aria-labelledby="sec-hospital">
+        <div className="section-head">
+          <h2 id="sec-hospital" className="section-title">병원 창구와 소통하기</h2>
+          {visit.pending.length > 0 && <span className="count">답변 대기 {visit.pending.length}개</span>}
+        </div>
+        <ul className="list plain">
+          <li>
+            <button className="item row-button" style={{ alignItems: 'center' }} onClick={() => navigate('/after/hospital')}>
+              <span className="item-icon" aria-hidden><QrCode size={24} /></span>
+              <span className="grow">
+                <span className="item-title" style={{ display: 'block' }}>병원에 문의하기</span>
+                <span className="sub" style={{ display: 'block', marginTop: 4 }}>QR을 보여주고 질문과 답변을 주고받아요.</span>
+              </span>
+              <ChevronRight size={22} aria-hidden style={{ flex: 'none', color: 'var(--ink-sub)' }} />
+            </button>
+          </li>
+        </ul>
+      </section>
+
       <section className="section" aria-labelledby="sec-src">
         <div className="section-head">
           <h2 id="sec-src" className="section-title">모은 자료</h2>
@@ -250,32 +269,8 @@ export default function After() {
           <Plus size={20} aria-hidden />
           자료 추가
         </button>
-        <div className="btn-row mt8">
-          <button className="link" onClick={() => navigate('/after/hospital')}>
-            병원과 주고받은 내용
-            <ChevronRight size={16} aria-hidden />
-          </button>
-          {visit.traces.length > 0 && (
-            <button className="link" onClick={() => navigate('/trace')}>
-              어떻게 정리했는지 보기
-              <ChevronRight size={16} aria-hidden />
-            </button>
-          )}
-        </div>
       </section>
 
-      {plan && visit.storage === 'unset' && (
-        <section className="section panel" aria-labelledby="sec-keep">
-          <h2 id="sec-keep" className="item-title">이 기기에 {RETENTION_DAYS}일간 보관할까요?</h2>
-          <p className="sub mt8">보관하면 내일 다시 열어 볼 수 있어요. 여럿이 쓰는 기기에서는 보관하지 않는 것이 좋아요.</p>
-          <button className="btn btn-secondary btn-block mt16" onClick={() => setStorage('local')}>
-            {RETENTION_DAYS}일간 보관
-          </button>
-          <button className="btn-text" onClick={() => setStorage('session')}>
-            보관하지 않기
-          </button>
-        </section>
-      )}
       {visit.storageFailed && (
         <div className="mt16">
           <Notice tone="error" title="이 기기에 저장하지 못했어요.">
@@ -287,6 +282,15 @@ export default function After() {
         </div>
       )}
 
+
+      {visit.traces.length > 0 && (
+        <div className="section">
+          <button className="link" onClick={() => navigate('/trace')}>
+            어떻게 정리했는지 보기
+            <ChevronRight size={16} aria-hidden />
+          </button>
+        </div>
+      )}
 
       <Sheet open={!!viewing} title={viewing?.label ?? ''} onClose={() => setViewing(null)}>
         {viewing && (

@@ -7,7 +7,7 @@ import { formatDate, formatTime } from '../lib/time'
 import type { Note, Preparation, Visit } from '../lib/types'
 import { addTrace, getVisit, mutate, setPresenting, uid, useVisit } from '../store/visit'
 import { finishPreparationSection, preparationOf, savePreparationNote } from '../store/preparation'
-import { DemoTag, Notice } from '../ui'
+import { Notice } from '../ui'
 import PreparationSummary from './PreparationSummary'
 import '../styles/preparation.css'
 
@@ -200,11 +200,6 @@ export default function Prepare() {
         <h1 className="title" tabIndex={-1} ref={heading}>
           {title}
         </h1>
-        {visit.demo && (
-          <p className="mt16">
-            <DemoTag />
-          </p>
-        )}
         {step === 'reason' && (
           <>
             <p className="lead">
